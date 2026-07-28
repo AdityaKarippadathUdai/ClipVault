@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 import { Snippet, ViewMode, ActiveNavigation, SortOption, SortOrder, LanguageType } from '../types';
 import { initialSnippets } from '../data/mockSnippets';
 
+const defaultInitialSnippets = initialSnippets;
+
 interface SnippetState {
   snippets: Snippet[];
   selectedSnippetId: string | null;
@@ -40,7 +42,7 @@ interface SnippetState {
 export const useSnippetStore = create<SnippetState>()(
   persist(
     (set, get) => ({
-      snippets: initialSnippets,
+      snippets: defaultInitialSnippets,
       selectedSnippetId: 'snip-1',
       searchQuery: '',
       selectedFolderId: null,
@@ -65,6 +67,7 @@ export const useSnippetStore = create<SnippetState>()(
           snippets: [newSnippet, ...state.snippets],
           selectedSnippetId: newId,
         }));
+        window.electronApi?.addClipboardItem({ text: newSnippet.content, sourceApp: 'ClipVault' });
         return newId;
       },
 

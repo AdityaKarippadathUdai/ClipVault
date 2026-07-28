@@ -32,6 +32,10 @@ export const MainLayout: React.FC = () => {
     }
   }, [settings.theme]);
 
+  useEffect(() => {
+    useSettingsStore.getState().hydrateFromElectron();
+  }, []);
+
   // Global hotkeys (⌘K command palette)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 import { ClipboardItem, LanguageType } from '../types';
 import { initialClipboardItems } from '../data/mockClipboard';
 
+const defaultInitialClipboardItems = initialClipboardItems;
+
 interface ClipboardState {
   items: ClipboardItem[];
   isWatcherActive: boolean;
@@ -26,7 +28,7 @@ function detectLanguage(text: string): LanguageType {
 export const useClipboardStore = create<ClipboardState>()(
   persist(
     (set) => ({
-      items: initialClipboardItems,
+      items: defaultInitialClipboardItems,
       isWatcherActive: true,
 
       addClipboardItem: (text, sourceApp = 'System Clipboard') => {
@@ -51,6 +53,7 @@ export const useClipboardStore = create<ClipboardState>()(
         set((state) => ({
           items: [newItem, ...state.items.filter((i) => i.text !== text)],
         }));
+        window.electronApi?.addClipboardItem({ text, sourceApp, detectedLanguage: detectLanguage(text) });
       },
 
       removeClipboardItem: (id) => {
