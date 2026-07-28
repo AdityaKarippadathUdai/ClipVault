@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useSnippetStore } from '../../store/useSnippetStore';
 import { useClipboardStore } from '../../store/useClipboardStore';
+import { useFolderStore } from '../../store/useFolderStore';
 import { FolderTree } from './FolderTree';
 import { SidebarItem } from './SidebarItem';
 import { Folder, ActiveNavigation } from '../../types';
@@ -32,6 +33,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     activeNavigation,
     setActiveNavigation,
   } = useSnippetStore();
+  const { folders } = useFolderStore();
   const { items: clipboardItems } = useClipboardStore();
 
   const [width, setWidth] = useState(240);
@@ -169,14 +171,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="mx-3 my-3 h-[1px] bg-slate-200 dark:bg-slate-800" />
 
       <div className="flex-1 flex flex-col min-h-0 px-2 overflow-y-auto">
-        <div className="flex items-center justify-between px-1 mb-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+        <div className="flex items-center justify-between px-1.5 py-1 mb-1 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider group">
           <div className="flex items-center gap-1.5">
-            <Layers className="w-3.5 h-3.5" />
-            <span>Folders</span>
+            <Layers className="w-3.5 h-3.5 text-blue-500/90 dark:text-blue-400 shrink-0" />
+            <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Folders</span>
+            {folders.length > 0 && (
+              <span className="ml-1 px-1.5 py-0.2 text-[10px] font-mono rounded-full bg-slate-200/60 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium normal-case">
+                {folders.length}
+              </span>
+            )}
           </div>
           <button
             onClick={() => onOpenNewFolderDialog(null)}
-            className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition"
+            className="p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-950/60 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-150 active:scale-95 flex items-center justify-center"
             title="Create root folder"
           >
             <FolderPlus className="w-3.5 h-3.5" />

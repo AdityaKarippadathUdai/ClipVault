@@ -37,10 +37,10 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
           onClick={() => setSelectedFolderId(folder.id)}
           onContextMenu={(e) => onContextMenu?.(e, folder)}
           style={{ paddingLeft: `${depth * 12 + 8}px` }}
-          className={`group flex items-center justify-between py-1 pr-2 rounded-md text-xs cursor-pointer transition ${
+          className={`group flex items-center justify-between py-1.5 pr-2 rounded-lg text-xs cursor-pointer transition-all ${
             isSelected
-              ? 'bg-blue-600/15 text-blue-600 dark:text-blue-400 font-semibold'
-              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-slate-800/60'
+              ? 'bg-blue-600/15 text-blue-600 dark:text-blue-400 font-semibold border-l-2 border-blue-500'
+              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 border-l-2 border-transparent'
           }`}
         >
           <div className="flex items-center gap-1.5 min-w-0">
