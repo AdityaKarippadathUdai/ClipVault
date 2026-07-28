@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, nativeImage, Tray, globalShortcut, Notification } from 'electron';
+import { app, BrowserWindow, Menu, nativeImage, Tray, globalShortcut } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { initDb, runMigrations } from './database/db';
@@ -47,7 +47,8 @@ function createWindow() {
   });
 
   mainWindow.on('close', (event) => {
-    if (!app.isQuitting) {
+    const isQuitting = (app as typeof app & { isQuitting?: boolean }).isQuitting;
+    if (!isQuitting) {
       event.preventDefault();
       mainWindow?.hide();
     }
@@ -71,7 +72,7 @@ function createTray() {
     { label: 'Show ClipVault', click: () => mainWindow?.show() },
     { label: 'New Clipboard Entry', click: () => mainWindow?.webContents.send('clipboard:changed', { action: 'new' }) },
     { type: 'separator' },
-    { label: 'Quit', click: () => { app.isQuitting = true; mainWindow?.destroy(); app.quit(); } },
+    { label: 'Quit', click: () => { (app as typeof app & { isQuitting?: boolean }).isQuitting = true; mainWindow?.destroy(); app.quit(); } },
   ]));
   tray.on('click', () => mainWindow?.show());
 }
