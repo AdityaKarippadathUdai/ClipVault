@@ -1,0 +1,6 @@
+{
+  "name": "ClipVault Desktop",
+  "description": "Modern VS Code inspired desktop Clipboard Manager and Code Snippet Studio with nested folders, instant search, language tags, Monaco editor, and theme customization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
