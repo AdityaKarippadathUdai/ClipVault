@@ -2,6 +2,8 @@ import { clipboard, ipcMain, Notification } from 'electron';
 import { db } from '../database/db';
 import { listSettings } from '../repositories/settingsRepository';
 
+const clipboardApi = clipboard as typeof clipboard & { on?: (event: string, listener: () => void) => void };
+
 function detectType(text: string) {
   if (!text) return 'text';
   if (/^https?:\/\//i.test(text)) return 'url';
@@ -61,7 +63,7 @@ export function registerClipboardIpc() {
     return true;
   });
 
-  clipboard.on('text-changed', () => {
+  clipboardApi.on?.('text-changed', () => {
     const text = clipboard.readText();
     if (text) {
       db.prepare(`
