@@ -77,6 +77,10 @@ export function initDb() {
   insert.run('windowBounds', JSON.stringify({ width: 1280, height: 860, x: 100, y: 100 }));
 }
 
+export function runMigrations() {
+  // Placeholder for future migrations.
+}
+
 export function rebuildFts() {
   db.exec(`
     DELETE FROM snippets_fts;
