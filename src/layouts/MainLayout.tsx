@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Toolbar } from '../components/Toolbar';
-import { Sidebar } from '../components/Sidebar';
-import { SnippetGrid } from '../components/SnippetGrid';
-import { SnippetEditor } from '../components/Editor';
-import { StatusBar } from '../components/StatusBar';
-import { ClipboardHistoryView } from '../components/ClipboardHistoryView';
-import { SettingsPanel } from '../components/SettingsPanel';
-import { FolderDialog } from '../components/FolderDialog';
-import { ContextMenu, ContextMenuPosition } from '../components/ContextMenu';
-import { QuickActionsModal } from '../components/QuickActionsModal';
+import { Toolbar } from '../components/toolbar';
+import { Sidebar } from '../components/sidebar';
+import { SnippetGrid } from '../components/cards';
+import { SnippetEditor } from '../components/editor';
+import { StatusBar } from '../components/layout';
+import { ClipboardHistoryView } from '../components/common';
+import { SettingsPanel } from '../components/settings';
+import { FolderDialog } from '../components/dialogs';
+import { ContextMenu, ContextMenuPosition } from '../components/common';
+import { QuickActionsModal } from '../components/search';
 import { useSnippetStore } from '../store/useSnippetStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { Folder, Snippet } from '../types';
@@ -32,7 +32,7 @@ export const MainLayout: React.FC = () => {
     }
   }, [settings.theme]);
 
-  // Global hotkeys (⌘K command palette, ⌘N new snippet)
+  // Global hotkeys (⌘K command palette)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {

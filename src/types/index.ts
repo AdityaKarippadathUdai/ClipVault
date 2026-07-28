@@ -1,3 +1,10 @@
+export interface LanguageMeta {
+  label: string;
+  color: string;
+  icon?: string;
+  extension?: string;
+}
+
 export type LanguageType =
   | 'typescript'
   | 'javascript'
