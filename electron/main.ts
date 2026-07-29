@@ -178,7 +178,10 @@ async function createWindow() {
     backgroundColor: '#020617',
     title: 'ClipVault',
     webPreferences: {
-      preload: path.resolve(__dirname, 'preload.js'),
+      preload: path.resolve(
+        __dirname,
+        __dirname.endsWith('electron') ? '../dist-electron/preload.js' : 'preload.js'
+      ),
       contextIsolation: true,
       sandbox: true,
       nodeIntegration: false,
