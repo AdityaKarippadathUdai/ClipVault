@@ -1,7 +1,10 @@
 import { BrowserWindow, ipcMain, app } from 'electron';
 
-export function registerWindowIpc(mainWindow: BrowserWindow | null) {
+type WindowGetter = () => BrowserWindow | null;
+
+export function registerWindowIpc(getMainWindow: WindowGetter) {
   ipcMain.handle('window:open', () => {
+    const mainWindow = getMainWindow();
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.show();
@@ -11,16 +14,17 @@ export function registerWindowIpc(mainWindow: BrowserWindow | null) {
   });
 
   ipcMain.handle('window:minimize', () => {
-    mainWindow?.minimize();
+    getMainWindow()?.minimize();
     return true;
   });
 
   ipcMain.handle('window:close', () => {
-    mainWindow?.close();
+    getMainWindow()?.close();
     return true;
   });
 
   ipcMain.handle('window:toggle-tray', (_event, visible: boolean) => {
+    const mainWindow = getMainWindow();
     if (mainWindow) {
       if (visible) mainWindow.hide();
       else mainWindow.show();
