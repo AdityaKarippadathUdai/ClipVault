@@ -21,6 +21,8 @@ function log(message: string, ...args: unknown[]) {
 }
 
 app.disableHardwareAcceleration();
+app.setName('ClipVault');
+app.setAppUserModelId('com.clipvault.desktop');
 
 if (process.platform === 'linux') {
   app.commandLine.appendSwitch('disable-gpu');
@@ -55,9 +57,25 @@ let mainWindow: AppWindow = null;
 let tray: Tray | null = null;
 let rendererReady = false;
 
+function getAppIcon() {
+  const candidates = [
+    path.resolve(__dirname, '../assets/Icon.png'),
+    path.join(process.resourcesPath || '', 'assets', 'Icon.png'),
+    path.resolve(__dirname, '../assets/icon.png'),
+    path.join(process.resourcesPath || '', 'assets', 'icon.png'),
+  ];
+
+  for (const iconPath of candidates) {
+    if (fs.existsSync(iconPath)) {
+      return nativeImage.createFromPath(iconPath);
+    }
+  }
+
+  return nativeImage.createEmpty();
+}
+
 function createTray() {
-  const iconPath = path.join(__dirname, 'assets', 'icons', 'icon.png');
-  const icon = fs.existsSync(iconPath) ? nativeImage.createFromPath(iconPath) : nativeImage.createEmpty();
+  const icon = getAppIcon();
   tray = new Tray(icon.resize({ width: 24, height: 24 }));
   tray.setToolTip('ClipVault');
   tray.setContextMenu(Menu.buildFromTemplate([
@@ -148,8 +166,7 @@ async function showWindowWhenReady() {
 }
 
 async function createWindow() {
-  const iconPath = path.join(__dirname, 'assets', 'icons', 'icon.png');
-  const icon = fs.existsSync(iconPath) ? nativeImage.createFromPath(iconPath) : nativeImage.createEmpty();
+  const icon = getAppIcon();
 
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -171,6 +188,8 @@ async function createWindow() {
   });
 
   log('browser window created');
+  mainWindow.setMenuBarVisibility(false);
+  mainWindow.setAutoHideMenuBar(true);
 
   mainWindow.once('ready-to-show', () => {
     log('ready-to-show received');
@@ -223,6 +242,7 @@ async function createWindow() {
 }
 
 app.whenReady().then(() => {
+  Menu.setApplicationMenu(null);
   log('electron app ready');
   initDb();
   runMigrations();
