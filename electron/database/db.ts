@@ -88,3 +88,9 @@ export function rebuildFts() {
     SELECT rowid, title, content, tags, folderId, language FROM snippets;
   `);
 }
+
+export function closeDb() {
+  if (db.open) {
+    db.close();
+  }
+}
