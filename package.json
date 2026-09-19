@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "main": "./dist-electron/main.js",
+  "desktopName": "clipvault",
   "description": "ClipVault desktop clipboard manager",
   "author": {
     "name": "ClipVault",
