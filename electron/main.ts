@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { initDb, runMigrations } from './database/db';
+import { closeDb, initDb, runMigrations } from './database/db';
 import { registerClipboardIpc } from './ipc/clipboard';
 import { registerFolderIpc } from './ipc/folders';
 import { registerSettingsIpc } from './ipc/settings';
@@ -55,7 +55,7 @@ type AppWindow = BrowserWindow | null;
 
 let mainWindow: AppWindow = null;
 let tray: Tray | null = null;
-let rendererReady = false;
+let clipboardCleanup: (() => void) | null = null;
 
 function getAppIcon() {
   const candidates = [
@@ -75,6 +75,7 @@ function getAppIcon() {
 }
 
 function createTray() {
+  if (tray) return;
   const icon = getAppIcon();
   tray = new Tray(icon.resize({ width: 24, height: 24 }));
   tray.setToolTip('ClipVault');
@@ -82,9 +83,25 @@ function createTray() {
     { label: 'Show ClipVault', click: () => mainWindow?.show() },
     { label: 'New Clipboard Entry', click: () => mainWindow?.webContents.send('clipboard:changed', { action: 'new' }) },
     { type: 'separator' },
-    { label: 'Quit', click: () => { (app as typeof app & { isQuitting?: boolean }).isQuitting = true; mainWindow?.destroy(); app.quit(); } },
+    { label: 'Quit', click: () => app.quit() },
   ]));
   tray.on('click', () => mainWindow?.show());
+}
+
+function cleanup() {
+  if (clipboardCleanup) {
+    clipboardCleanup();
+    clipboardCleanup = null;
+  }
+
+  globalShortcut.unregisterAll();
+
+  if (tray) {
+    tray.destroy();
+    tray = null;
+  }
+
+  closeDb();
 }
 
 function registerShortcuts() {
@@ -117,13 +134,15 @@ function canReachUrl(url: string): Promise<boolean> {
 }
 
 async function resolveRendererUrl(): Promise<string> {
-  if (START_URL) {
-    return START_URL;
-  }
+  if (!app.isPackaged) {
+    if (START_URL) {
+      return START_URL;
+    }
 
-  for (const url of DEV_SERVER_URLS) {
-    if (await canReachUrl(url)) {
-      return url;
+    for (const url of DEV_SERVER_URLS) {
+      if (await canReachUrl(url)) {
+        return url;
+      }
     }
   }
 
@@ -132,37 +151,6 @@ async function resolveRendererUrl(): Promise<string> {
   }
 
   return 'data:text/html;charset=utf-8,<!doctype html><html><body>ClipVault is starting…</body></html>';
-}
-
-async function showWindowWhenReady() {
-  if (!mainWindow || mainWindow.isDestroyed()) return;
-  if (rendererReady) {
-    mainWindow.show();
-    mainWindow.focus();
-    return;
-  }
-
-  for (let attempt = 0; attempt < 10; attempt += 1) {
-    try {
-      const ready = await mainWindow.webContents.executeJavaScript('globalThis.__clipvaultRenderReady === true');
-      if (ready) {
-        rendererReady = true;
-        log('renderer signalled ready');
-        mainWindow.show();
-        mainWindow.focus();
-        return;
-      }
-    } catch (error) {
-      log('renderer readiness check failed', error);
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
-  }
-
-  rendererReady = true;
-  log('renderer did not signal readiness, showing window anyway');
-  mainWindow.show();
-  mainWindow.focus();
 }
 
 async function createWindow() {
@@ -196,19 +184,8 @@ async function createWindow() {
 
   mainWindow.once('ready-to-show', () => {
     log('ready-to-show received');
-  });
-
-  mainWindow.on('close', (event) => {
-    const isQuitting = (app as typeof app & { isQuitting?: boolean }).isQuitting;
-    if (!isQuitting) {
-      event.preventDefault();
-      mainWindow?.hide();
-    }
-  });
-
-  mainWindow.webContents.on('did-finish-load', () => {
-    log('renderer finished load');
-    void showWindowWhenReady();
+    mainWindow?.show();
+    mainWindow?.focus();
   });
 
   mainWindow.webContents.on('did-navigate', (_event, url) => {
@@ -249,7 +226,7 @@ app.whenReady().then(() => {
   log('electron app ready');
   initDb();
   runMigrations();
-  registerClipboardIpc();
+  clipboardCleanup = registerClipboardIpc();
   registerFolderIpc();
   registerSettingsIpc();
   registerSnippetIpc();
@@ -259,7 +236,10 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  if (process.platform !== 'darwin') {
+    cleanup();
+    app.quit();
+  }
 });
 
 app.on('activate', () => {
@@ -267,5 +247,5 @@ app.on('activate', () => {
 });
 
 app.on('will-quit', () => {
-  globalShortcut.unregisterAll();
+  cleanup();
 });
