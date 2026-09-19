@@ -97,7 +97,7 @@ function registerShortcuts() {
 
 function showErrorScreen(message: string) {
   if (!mainWindow || mainWindow.isDestroyed()) return;
-  const html = `<!doctype html><html><head><meta charset="utf-8" /><meta http-equiv="Content-Security-Policy" content="default-src 'self' data: 'unsafe-inline';" /><title>ClipVault</title></head><body style="font-family: sans-serif; margin: 0; padding: 2rem; background: #020617; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; box-sizing: border-box;"><div style="max-width: 560px; line-height: 1.6;"> <h1 style="margin-bottom: 0.5rem;">ClipVault failed to start</h1><p>${message}</p></div></body></html>`;
+  const html = `<!doctype html><html><head><meta charset="utf-8" /><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';" /><title>ClipVault</title></head><body style="font-family: sans-serif; margin: 0; padding: 2rem; background: #020617; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; box-sizing: border-box;"><div style="max-width: 560px; line-height: 1.6;"> <h1 style="margin-bottom: 0.5rem;">ClipVault failed to start</h1><p>${message}</p></div></body></html>`;
   void mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
 }
 
