@@ -36,7 +36,7 @@ if (process.platform === 'linux') {
   app.commandLine.appendSwitch('disable-features', 'VizDisplayCompositor,AcceleratedVideoDecode,AcceleratedVideoEncode,CanvasOopRasterization,UseSkiaRenderer');
 }
 
-app.on('uncaughtException', (error) => {
+process.on('uncaughtException', (error) => {
   log('uncaught exception', error);
 });
 
