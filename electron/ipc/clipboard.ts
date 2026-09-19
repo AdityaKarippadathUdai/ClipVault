@@ -2,7 +2,10 @@ import { clipboard, ipcMain, Notification } from 'electron';
 import { db } from '../database/db';
 import { listSettings } from '../repositories/settingsRepository';
 
-const clipboardApi = clipboard as typeof clipboard & { on?: (event: string, listener: () => void) => void };
+const clipboardApi = clipboard as typeof clipboard & {
+  on?: (event: string, listener: () => void) => void;
+  removeListener?: (event: string, listener: () => void) => void;
+};
 
 function detectType(text: string) {
   if (!text) return 'text';
@@ -63,7 +66,7 @@ export function registerClipboardIpc() {
     return true;
   });
 
-  clipboardApi.on?.('text-changed', () => {
+  const clipboardListener = () => {
     const text = clipboard.readText();
     if (text) {
       db.prepare(`
@@ -72,5 +75,11 @@ export function registerClipboardIpc() {
         ON CONFLICT(id) DO NOTHING
       `).run(`clip-${Date.now()}`, text, detectType(text), new Date().toISOString(), 0, 'System Clipboard', text.length, text.split(/\r?\n/).length, 'text');
     }
-  });
+  };
+
+  clipboardApi.on?.('text-changed', clipboardListener);
+
+  return () => {
+    clipboardApi.removeListener?.('text-changed', clipboardListener);
+  };
 }
