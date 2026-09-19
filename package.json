@@ -92,7 +92,8 @@
       "target": ["deb"],
       "category": "Utility",
       "description": "A desktop clipboard manager for organizing snippets and clipboard history.",
-      "icon": "build/icons"
+      "icon": "build/icons",
+      "syncDesktopName": true
     },
     "nsis": {
       "oneClick": false,
